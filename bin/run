@@ -1,0 +1,54 @@
+#!/bin/bash
+
+EXIT_CODE=0
+
+if [ -z $GPP_DIR ] 
+then
+   GPP_DIR=`dirname $0`/../
+fi
+
+if [ -z $JAVA_MEM_FLAG ] 
+then
+    JAVA_MEM_FLAG=-Xmx4g
+fi
+
+MANAGED_JARS="`find $GPP_DIR/lib_managed -name '*.jar' -print | tr '\n' ':'`"
+UNMANAGED_JARS="`find $GPP_DIR/lib -name '*.jar' -print | tr '\n' ':'`"
+
+SCALA_LIB="$HOME/.sbt/boot/scala-2.10.1/lib/scala-library.jar"
+
+CP="$GPP_DIR/target/classes:$SCALA_LIB:$GPP_DIR/src/main/resources:$MANAGED_JARS:$UNMANAGED_JARS"
+
+JAVA="$JAVA_HOME/bin/java"
+JAVA_COMMAND="$JAVA -classpath $CP -Dgpp.dir=$GPP_DIR"
+
+CMD=$1
+shift
+
+help()
+{
+cat <<EOF
+gpp 0.1 commands: 
+
+  run              run the main method of a given class
+  exp              run the main method of class gpp.exp.Gpp
+  convert-stanford run the main method of class gpp.exp.ConvertStanford
+
+Include --help with any option for more information
+EOF
+}
+
+CLASS=
+
+case $CMD in
+    run) CLASS=$1; shift;;
+    nlp) CLASS=nlp.articles.Nlp;;
+    help) help; exit 1;;
+    *) echo "Unrecognized command: $CMD"; help; exit 1;;
+esac
+
+$JAVA_COMMAND $CLASS ${1+"$@"} 
+(( EXIT_CODE += $? ))
+
+exit $EXIT_CODE
+
