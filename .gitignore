@@ -7,4 +7,5 @@ target/
 *~
 *.class
 *.pyc
+*.swp
 nytimes.properties
