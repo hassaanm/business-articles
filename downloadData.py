@@ -25,6 +25,39 @@ def getCompanies(csvFile):
 
     return companies, symbols
 
+# download urls and write to files
+def downloadURLs(companies, symbols, fileName):
+    data = {}
+    track = 0
+    for company, symbol in zip(companies, symbols):
+        # try to download data
+        try:
+            company = company.replace(' ', '+')
+            url = NYT_URL + company.replace('&#39;', "'") + NYT_FILTER + NYT_API_KEY
+            jsonRawData = urllib2.urlopen(url)
+            jsonData = json.load(jsonRawData)
+            for article in jsonData['response']['docs']:
+                if article['section_name'] == 'Business Day' or article['section_name'] == 'Technology':
+                    webURL = article['web_url']
+                    if webURL != None:
+                        if webURL in data:
+                            data[article['web_url']] += [symbol]
+                        else:
+                            data[article['web_url']] = [symbol]
+        except:
+            print 'No data for', company, symbol
+
+        # to show progress of download
+        if track % 100 == 0:
+            print float(track) / len(companies)
+        track += 1
+
+        # sleep to stay within api requirements of 10/second
+        time.sleep(0.1)
+
+    with open(fileName, 'w') as outfile:
+        json.dump(data, outfile)
+
 # download data and write to files
 def downloadData(companies, symbols, fileName):
     data = {}
@@ -64,11 +97,18 @@ def downloadData(companies, symbols, fileName):
         json.dump(data, outfile)
 
 # get arguments
-csvFile = sys.argv[1]
-jsonFile = csvFile.replace('.csv', '_Articles.json')
+csvFile = sys.argv[2]
+articleFile = csvFile.replace('.csv', '_Articles.json')
+urlFile = csvFile.replace('.csv', '_URLs.json')
 
 # get companies and symbols for csvFile
 companies, symbols = getCompanies(csvFile)
 
-# download articles for companies
-downloadData(companies, symbols, jsonFile)
+if sys.argv[1].lower() == 'data':
+    # download articles for companies
+    downloadData(companies, symbols, articleFile)
+elif sys.argv[1].lower() == 'url':
+    # download article URLs for companies
+    downloadURLs(companies, symbols, urlFile)
+else:
+    print 'Incorrect use'
