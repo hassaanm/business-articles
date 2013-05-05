@@ -37,7 +37,7 @@ def downloadURLs(companies, symbols, fileName):
             jsonRawData = urllib2.urlopen(url)
             jsonData = json.load(jsonRawData)
             for article in jsonData['response']['docs']:
-                if article['section_name'] == 'Business Day' or article['section_name'] == 'Technology':
+                if article['section_name'] == 'Business Day' or article['section_name'] == 'Technology' or article['section_name'] == 'Your Money':
                     webURL = article['web_url']
                     if webURL != None:
                         if webURL in data:
@@ -71,7 +71,7 @@ def downloadData(companies, symbols, fileName):
             jsonRawData = urllib2.urlopen(url)
             jsonData = json.load(jsonRawData)
             for article in jsonData['response']['docs']:
-                if article['section_name'] == 'Business Day' or article['section_name'] == 'Technology':
+                if article['section_name'] == 'Business Day' or article['section_name'] == 'Technology' or article['section_name'] == 'Your Money':
                     articleText = ''
                     if article['headline']['main'] != None:
                         articleText += article['headline']['main'] + ' '
