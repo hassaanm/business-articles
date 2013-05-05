@@ -20,7 +20,7 @@ SCALA_LIB="$HOME/.sbt/boot/scala-2.10.1/lib/scala-library.jar"
 CP="$GPP_DIR/target/classes:$SCALA_LIB:$GPP_DIR/src/main/resources:$MANAGED_JARS:$UNMANAGED_JARS"
 
 JAVA="$JAVA_HOME/bin/java"
-JAVA_COMMAND="$JAVA -classpath $CP -Dgpp.dir=$GPP_DIR"
+JAVA_COMMAND="java -classpath $CP -Dgpp.dir=$GPP_DIR"
 
 CMD=$1
 shift
@@ -31,8 +31,7 @@ cat <<EOF
 gpp 0.1 commands: 
 
   run              run the main method of a given class
-  exp              run the main method of class gpp.exp.Gpp
-  convert-stanford run the main method of class gpp.exp.ConvertStanford
+  nlp              run the main method of class nlp.articles.Articles
 
 Include --help with any option for more information
 EOF
@@ -42,7 +41,7 @@ CLASS=
 
 case $CMD in
     run) CLASS=$1; shift;;
-    nlp) CLASS=nlp.articles.Nlp;;
+    nlp) CLASS=nlp.articles.Articles;;
     help) help; exit 1;;
     *) echo "Unrecognized command: $CMD"; help; exit 1;;
 esac

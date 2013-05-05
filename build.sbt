@@ -13,7 +13,8 @@ crossPaths := false
 resolvers ++= Seq(
   "opennlp sourceforge repo" at "http://opennlp.sourceforge.net/maven2",
   "Sonatype Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/",
-  "Sonatype Releases" at "https://oss.sonatype.org/content/repositories/releases/"
+  "Sonatype Releases" at "https://oss.sonatype.org/content/repositories/releases/",
+  "repo.codahale.com" at "http://repo.codahale.com"
 )
 
 libraryDependencies ++= Seq(
@@ -21,5 +22,6 @@ libraryDependencies ++= Seq(
   "org.scalanlp" % "chalk" % "1.1.3-SNAPSHOT",
   "org.rogach" %% "scallop" % "0.8.1",
   "org.clapper" % "argot_2.9.1" % "0.3.8",
-  "gov.nist.math" % "jama" % "1.0.2" 
+  "gov.nist.math" % "jama" % "1.0.2",
+  "com.codahale" % "jerkson_2.9.1" % "0.5.0"
 )
