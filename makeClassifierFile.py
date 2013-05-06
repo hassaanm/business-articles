@@ -21,20 +21,28 @@ def getLabel(articleReturn):
     else:
         return "Really Bad"
 
+def cleanText(text):
+    while '<' in text:
+        start = text.find('<')
+        end = text.find('>')
+        text = text[:start] + text[end+1:]
+    return text
+
 def writeClassifier(jsonData, fileName):
     f = open(fileName, 'w')
     f.write("<dataset>\n")
 
     for article in jsonData.keys():
         articleReturn = jsonData[article]
+        articleText = cleanText(article.strip().encode('utf8').replace("&", "and"))
         f.write('\t<item label="' + getLabel(articleReturn) + '">\n')
-        f.write("\t\t<conten>" + article.trim() + "</content>\n")
+        f.write("\t\t<content>" + articleText + "</content>\n")
         f.write("\t</item>\n")
 
     f.write("</dataset>\n")
     f.close()
 
-def splitDate(jsonData, testPercentage):
+def splitData(jsonData, testPercentage):
     trainData = {}
     testData = {}
 
