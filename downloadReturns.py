@@ -66,6 +66,8 @@ def getReturnForCompany(symbol, date, numOfDays):
 def returnsJSON(jsonData, days):
     returns = {}
 
+    progress = 0
+    size = float(len(jsonData.keys()))
     for article in jsonData.keys():
         date = jsonData[article]["date"]
         companies = jsonData[article]["company"]
@@ -74,6 +76,9 @@ def returnsJSON(jsonData, days):
             articleReturns.append(getReturnForCompany(company, date, days))
         articleReturn = sum(articleReturns) / len(articleReturns)
         returns[article] = articleReturn
+
+        print progress / size, progress, "out of", size
+        progress += 1
 
     return returns
 
