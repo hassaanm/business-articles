@@ -27,9 +27,9 @@ def writeClassifier(jsonData, fileName):
 
     for article in jsonData.keys():
         articleReturn = jsonData[article]
-        f.write('<item label="' + getLabel(articleReturn) + '">\n')
-        f.write("<conten>" + article.trim() + "</content>\n")
-        f.write("</item>\n")
+        f.write('\t<item label="' + getLabel(articleReturn) + '">\n')
+        f.write("\t\t<conten>" + article.trim() + "</content>\n")
+        f.write("\t</item>\n")
 
     f.write("</dataset>\n")
     f.close()
