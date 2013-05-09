@@ -21,12 +21,15 @@ def writeJSON(jsonData, fileName):
 
 def fixSymbol(symbol) :
     if len(symbol) > 1 and symbol[-2] == "/":
-        symbol = symbol[:-2] + "-" + symbol[-1]
+        symbol = symbol[:-2] + '-' + symbol[-1]
     if '/' in symbol :
         symbol = symbol.split('/')[0]
     return symbol.replace('^', '-P').rstrip()
 
 def getReturn(returns):
+    if len(returns.keys()) == 0:
+        return 0
+
     firstDate = returns.keys()[0]
     lastDate = returns.keys()[0]
 
@@ -42,49 +45,78 @@ def getReturn(returns):
     return (closePrice - openPrice) / openPrice
 
 def getReturnForCompany(symbol, date, numOfDays):
-    endDate = datetime.datetime.strptime(date, "%Y-%m-%d") + datetime.timedelta(days=numOfDays)
+    endDate = datetime.datetime.strptime(date, '%Y-%m-%d') + datetime.timedelta(days=numOfDays)
     sym = fixSymbol(symbol)
     query = 'select * from yahoo.finance.historicaldata where symbol = "'+sym+'" and startDate = "'+str(date)+'" and endDate = "'+str(endDate.date())+'"'
     encoded_query = urllib.quote(query)
-    url = YAHOO_URL + encoded_query
-    jsonRawData = urllib2.urlopen(url)
-    jsonData = json.load(jsonRawData)
+    try:
+        url = YAHOO_URL + encoded_query
+        jsonRawData = urllib2.urlopen(url)
+        jsonData = json.load(jsonRawData)
 
-    if jsonData["query"]["results"] == None:
+        if jsonData['query']['results'] == None:
+            return 0.0
+
+        if type(jsonData['query']['results']['quote']) == type({}):
+            quotes = [jsonData['query']['results']['quote']]
+        else:
+            quotes = jsonData['query']['results']['quote']
+
+        returns = {}
+        for data in quotes:
+            returns[data['Date']] = (data['Open'], data['Close'])
+        return getReturn(returns)
+    except:
         return 0.0
 
-    if type(jsonData["query"]["results"]["quote"]) == type({}):
-        quotes = [jsonData["query"]["results"]["quote"]]
-    else:
-        quotes = jsonData["query"]["results"]["quote"]
-
-    returns = {}
-    for data in quotes:
-        returns[data["Date"]] = (data["Open"], data["Close"])
-    return getReturn(returns)
-
-def returnsJSON(jsonData, days):
+def returnsJSONSnippet(jsonData, days):
     returns = {}
 
     progress = 0
     size = float(len(jsonData.keys()))
     for article in jsonData.keys():
-        date = jsonData[article]["date"]
-        companies = jsonData[article]["company"]
+        date = jsonData[article]['date']
+        companies = jsonData[article]['company']
         articleReturns = []
         for company in companies:
             articleReturns.append(getReturnForCompany(company, date, days))
         articleReturn = sum(articleReturns) / len(articleReturns)
         returns[article] = articleReturn
 
-        print progress / size, progress, "out of", size
+        if progress % 100 == 0:
+            print progress / size, progress, 'out of', size
         progress += 1
 
     return returns
 
-inputFile = sys.argv[1]
-outputFile = sys.argv[2]
-days = int(sys.argv[3])
+def returnsJSONFull(jsonData, days):
+    returns = {}
+
+    progress = 0
+    size = float(len(jsonData))
+    for article in jsonData:
+        date = article['date']
+        companies = article['company']
+        articleReturns = []
+        for company in companies:
+            articleReturns.append(getReturnForCompany(company, date, days))
+        articleReturn = sum(articleReturns) / len(articleReturns)
+        key = article['title'][0] + ' ' + article['text']
+        returns[key] = articleReturn
+
+        if progress % 100 == 0:
+            print progress / size, progress, 'out of', size
+        progress += 1
+
+    return returns
+
+inputFile = sys.argv[2]
+outputFile = sys.argv[3]
+days = int(sys.argv[4])
 
 jsonData = getJSON(inputFile)
-writeJSON(returnsJSON(jsonData, days), outputFile)
+if sys.argv[1] == 'snippet':
+    jsonToWrite = returnsJSONSnippet(jsonData, days)
+elif sys.argv[1] == 'full':
+    jsonToWrite = returnsJSONFull(jsonData, days)
+writeJSON(jsonToWrite, outputFile)

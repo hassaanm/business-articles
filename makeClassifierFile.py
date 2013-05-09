@@ -21,20 +21,28 @@ def getLabel(articleReturn):
     else:
         return "Really Bad"
 
+def removeTags(text, openTag, closeTag):
+    flag = True
+    while openTag in text and closeTag in text and flag:
+        start = text.find(openTag)
+        end = text.find(closeTag)
+        if start < end:
+            text = text[:start] + text[end+1:]
+        else:
+            flag = False
+    return text.replace(openTag, '').replace(closeTag, '')
+
 def cleanText(text):
-    while '<' in text:
-        start = text.find('<')
-        end = text.find('>')
-        text = text[:start] + text[end+1:]
-    return text
+    return ' '.join(removeTags(removeTags(text, '<', '>'), '{', '}').replace("&", "and").split())
 
 def writeClassifier(jsonData, fileName):
     f = open(fileName, 'w')
     f.write("<dataset>\n")
 
+    size = len(jsonData.keys())
     for article in jsonData.keys():
         articleReturn = jsonData[article]
-        articleText = cleanText(article.strip().encode('utf8').replace("&", "and"))
+        articleText = cleanText(article.strip().encode('utf8'))
         f.write('\t<item label="' + getLabel(articleReturn) + '">\n')
         f.write("\t\t<content>" + articleText + "</content>\n")
         f.write("\t</item>\n")
